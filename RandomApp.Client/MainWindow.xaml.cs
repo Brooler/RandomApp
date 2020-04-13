@@ -16,7 +16,6 @@ namespace RandomApp.Client
     {
         private readonly IDataService _dataService;
         private readonly Timer _timer;
-        private static Mutex _mutex = new Mutex();
 
         public RandomModel Model { get; set; }
 
@@ -45,16 +44,11 @@ namespace RandomApp.Client
         {
             try
             {
-                _mutex.WaitOne(TimeSpan.FromSeconds(1));
-
                 Model.Number = Task.Run(async () => await _dataService.GetRandomNumber(), new CancellationTokenSource(900).Token).Result;
-
-                _mutex.ReleaseMutex();
             }
             catch (Exception ex)
             {
                 _timer.Stop();
-                _mutex.Dispose();
 
                 MessageBox.Show(ex.Message, "Something went wrong!");
             }
